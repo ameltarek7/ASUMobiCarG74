@@ -1,0 +1,38 @@
+
+int trig =7;
+int echo =8;
+
+void setup() 
+{
+ Serial.begin(9600);
+ pinMode(trig,OUTPUT);
+ pinMode(echo,INPUT);
+}
+
+void loop()
+{
+   long duration, distance; 
+   digitalWrite(trig, LOW); 
+   delay(2000);
+   digitalWrite(trig, HIGH);
+   delay(10000);
+   digitalWrite(trig, LOW);
+  duration = pulseIn(echo, HIGH);
+  distance = (duration/2) / 29.1;
+  if (distance < 25)
+Serial.println ("Close Obstacle detected!" );
+Serial.println ("Obstacle Details:");
+Serial.print ("Distance From Robot is " );
+Serial.print ( distance);
+Serial.print ( " CM!");
+Serial.println (" The obstacle is declared a threat due to close distance. ");
+Serial.println (" Turning !");
+  
+    }
+  else {
+   Serial.println ("No obstacle detected. going forward");
+   delay (15000);
+  
+  }  
+  
+}
