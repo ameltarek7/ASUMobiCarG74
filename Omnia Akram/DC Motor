@@ -1,0 +1,22 @@
+int motorPin = 9;
+int onYime = 2500;
+int offTime = 1000;
+void setup()
+{ pinMode (motorPin, OUTPUT);}
+voidloop()
+{
+analogWrire(motorPin,100);
+delay(onTime);
+digitalWrite(motorPin, LOW);
+delay(offTime);
+
+analogWrite(motorPin,190);
+delay(onTime);
+digitalWrite(motorPin, LOW);
+delay(offTime);
+
+analogWrite(motorPin,255);
+delay(onTime);
+digitalWrite(motorPin, LOW);
+delay(offTime);
+}
