@@ -87,7 +87,7 @@ void Stop()
   digitalWrite(motorD1,LOW);
   digitalWrite(motorD2,LOW); 
 }
-int speedv ( int Speed )
+void speedv ( int Speed )
 {
   analogWrite (enable1,Speed);
   analogWrite (enable2,Speed);
