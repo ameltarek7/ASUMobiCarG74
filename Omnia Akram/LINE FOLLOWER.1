@@ -1,0 +1,100 @@
+int motorA1 = 2;  
+int motorA2 = 3;  
+int motorB1 = 4;  
+int motorB2 = 5;  
+int motorC1 = 6;   
+int motorC2 = 7;    
+int motorD1 = 8;       
+int motorD2 = 9;  
+int rightSensor = 12;  
+int leftSensor = 13; 
+int enable1 = A0;  
+ int enable2 = A1;
+ int enable3 = A2;  
+ int enable4 = A3;   
+int Speed =150;             
+void setup()   
+{  
+ Serial.begin(9600);  
+ pinMode(motorA1,OUTPUT);  
+  pinMode(motorA2,OUTPUT);  
+ pinMode(motorB1,OUTPUT);  
+  pinMode(motorB2,OUTPUT);  
+ pinMode(motorC1,OUTPUT);  
+  pinMode(motorC2,OUTPUT);  
+  pinMode(motorD1,OUTPUT);  
+ pinMode(motorD2,OUTPUT); 
+  pinMode(enable1,OUTPUT);
+   pinMode(enable2,OUTPUT);
+    pinMode(enable3,OUTPUT);
+     pinMode(enable4,OUTPUT);   
+ pinMode(rightSensor,INPUT);  
+ pinMode(leftSensor,INPUT);  
+   
+}  
+ void forword()  
+{  
+  digitalWrite(motorA1,HIGH);  
+   digitalWrite(motorA2,LOW);  
+ digitalWrite(motorB1,HIGH);  
+  digitalWrite(motorB2,LOW);  
+  digitalWrite(motorC1,HIGH);  
+   digitalWrite(motorC2,LOW);  
+   digitalWrite(motorD1,HIGH);  
+  digitalWrite(motorD2,LOW);  
+  
+ }  
+  
+ 
+ void turn_left()  
+ {  
+   digitalWrite(motorA1,HIGH);  
+  digitalWrite(motorA2,LOW);  
+  digitalWrite(motorB1,HIGH);  
+  digitalWrite(motorB2,LOW);  
+  digitalWrite(motorC1,LOW);  
+ digitalWrite(motorC2,HIGH);  
+ digitalWrite(motorD1,LOW);  
+  digitalWrite(motorD2,HIGH);  
+ }  
+  
+ void turn_right()  
+ {  
+   digitalWrite(motorA1,LOW);  
+   digitalWrite(motorA2,HIGH);  
+   digitalWrite(motorB1,LOW);  
+   digitalWrite(motorB2,HIGH);  
+  digitalWrite(motorC1,HIGH);  
+   digitalWrite(motorC2,LOW);  
+ digitalWrite(motorD1,HIGH);  
+  digitalWrite(motorD2,LOW);   
+ } 
+void Stop()  
+ {  
+   digitalWrite(motorA1,LOW);  
+   digitalWrite(motorA2,LOW);  
+   digitalWrite(motorB1,LOW);  
+   digitalWrite(motorB2,LOW);  
+  digitalWrite(motorC1,LOW);  
+  digitalWrite(motorC2,LOW);  
+  digitalWrite(motorD1,LOW);  
+   digitalWrite(motorD2,LOW);
+ }
+
+
+ void loop()  
+ {  
+     analogWrite(enable1 ,Speed);
+     analogWrite(enable2 ,Speed);
+     analogWrite(enable3 ,Speed);
+     analogWrite(enable4 ,Speed);
+ 
+ if (digitalRead(rightSensor)== 0 &&digitalRead(leftSensor)== 0) // forword  
+     forword();  
+ if (digitalRead(rightSensor)== 1 &&digitalRead(leftSensor )== 0) // turn right  
+    turn_right();  
+ if (digitalRead(rightSensor)== 0 &&digitalRead(leftSensor)== 1) // turn left  
+    turn_left();  
+ if ( digitalRead(rightSensor)== 1 &&digitalRead(leftSensor )==1) // stop  
+     Stop();  
+   }   
