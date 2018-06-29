@@ -1,0 +1,29 @@
+
+int i = 0;
+void setup()
+{
+  Serial.begin(9600);
+  pinMode(A0, INPUT);
+  pinMode(A1, INPUT);
+  pinMode(A2, INPUT);
+}
+void loop()
+{
+  double r = analogRead(A0);
+  double y = analogRead(A1);
+  double b = analogRead(A2);
+  if (r > 300 && r < 750){
+    
+    delay (6.66666666);
+    if ((y > 300 && y < 750) && (i == 0))
+    {
+      Serial.println("RYB");
+      i = 1;
+    }
+    if ((b > 300 && b < 750) && (i == 0))
+    {
+      Serial.println("RBY");
+      i = 1;
+    }
+  }
+}
