@@ -1,0 +1,22 @@
+void loop() 
+{
+   FORWARD(SPEED_Control);
+ byte  distance1 = ultrasonic1.Ranging(CM) ;// FRONT ultrasonic
+ byte  distance2 = ultrasonic2.Ranging(CM) ;// LEFT ultrasonic
+ byte  distance3 = ultrasonic3.Ranging(CM) ;// RIGHT ultrasonic
+  
+   if (distance1 <= 20 && distance2 <= 20 && distance3 > 20){
+      RIGHT(SPEED_Control);
+      delay(500);
+      }
+   else if (distance1 <= 20 && distance3 <= 20 && distance2 >20){
+      LEFT(SPEED_Control);
+      delay(500);
+      } 
+   else if (distance2 <= 20 && distance3 <= 20 && distance1 >20){
+      FORWARD(SPEED_Control);
+      delay(500);
+      } 
+  
+ 
+}
