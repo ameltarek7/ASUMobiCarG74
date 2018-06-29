@@ -1,0 +1,44 @@
+#include <SM.h>
+
+const int Samples = 32;
+const int NoSensors = 3;
+const unsigned long TimeBase = 60000;//one min
+
+SM Rpm(RpmReset, RpmCount);//statemachine for counting
+int RpmPulseCount;
+int Speed;
+int RpmEncState;
+
+SM EachSec(ES, ESwait);//statemachine for display
+
+void setup(){
+  Serial.begin(115200);
+  Serial.println("ready..");
+}//setup()
+
+void loop(){
+  EXEC(Rpm);
+  EXEC(EachSec);
+  //your code goes here, must be non-blocking
+}//loop()
+
+State RpmReset(){
+  RpmPulseCount=0;
+}//FanReset()
+
+State RpmCount(){
+  if(RE(digitalRead(2), RpmEncState)) RpmPulseCount++;
+  if(RpmPulseCount == Samples){
+    Speed = TimeBase*Samples/NoSensors/Rpm.Statetime();
+    Rpm.Restart();
+  }//if(FanPulseCount)
+}//FanCount()
+
+State ES(){
+  Serial.print("Rpm: ");
+  Serial.println(Speed);
+}//ES()
+
+State ESwait(){
+  if(EachSec.Timeout(1000)) EachSec.Restart();
+}//ESwait()
