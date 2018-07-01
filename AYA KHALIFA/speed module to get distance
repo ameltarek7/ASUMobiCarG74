@@ -1,0 +1,37 @@
+byte pulsesPerRev = 1; // this is to do with how many slots
+unsigned long prevMillis = 0;
+unsigned long nowMillis = 0;
+unsigned long pulseTime ;
+
+boolean sensorState;
+boolean lastSensorState;
+
+byte sensorPin = 2;
+
+int motorSpeedActual =0; //rpm
+
+void setup()
+{
+  pinMode(sensorPin, INPUT_PULLUP);
+}
+
+void loop()
+{
+  calcMotorSpeedActual();
+}
+
+void calcMotorSpeedActual()
+{
+  sensorState = digitalRead(sensorPin);
+  if ((sensorState != lastSensorState) && sensorState == HIGH) //changed and HIGH means just got interrupted
+  {
+    nowMillis = millis();
+    pulseTime = nowMillis - prevMillis;
+    motorSpeedActual = 60000 / pulsesPerRev  / pulseTime;
+    Serial.print(pulseTime);
+    Serial.print(" ");
+    Serial.println(motorSpeedActual);
+    prevMillis = nowMillis;
+  }
+  lastSensorState = sensorState;
+}// calcMotorSpeedActual
