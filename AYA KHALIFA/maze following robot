@@ -1,0 +1,235 @@
+HC-SR04 Ping distance sensor:
+VCC to arduino 5v 
+GND to arduino GND
+Echo to Arduino pin 7 
+Trig to Arduino pin 8
+*/
+//=======================================================MOTOR DEFINITIONS=====================================================================
+
+#define CW  0 // Clockwise and counter-clockwise definitions.
+#define CCW 1 // Depending on how you wired your motors, you may need to swap.
+#define MOTOR_A 0 // Motor definitions to make life easier:
+#define MOTOR_B 1
+
+//=======================================================SENSOR DEFINITIONS=====================================================================
+
+#define sens_1_echoPin 7 // Echo Pin
+#define sens_1_trigPin 8 // Trigger Pin
+#define sens_2_echoPin 5 // Echo Pin
+#define sens_2_trigPin 6 // Trigger Pin
+#define sens_3_echoPin 4 // Echo Pin
+#define sens_3_trigPin 2 // Trigger Pin
+
+const byte PWMA = 3;  // PWM control (speed) for motor A
+const byte PWMB = 11; // PWM control (speed) for motor B
+const byte DIRA = 12; // Direction control for motor A
+const byte DIRB = 13; // Direction control for motor B
+
+int maximumRange = 200; // Maximum range needed
+int minimumRange = 0; // Minimum range needed
+long duration_1;
+long duration_2;
+long duration_3;
+long distance_1;
+long distance_2;
+long distance_3;
+
+long center;
+
+
+
+
+
+void setup() {
+  
+Serial.begin (9600);
+setupArdumoto(); // Set all pins as outputs 
+pinMode(sens_1_trigPin, OUTPUT);
+pinMode(sens_1_echoPin, INPUT);
+pinMode(sens_2_trigPin, OUTPUT);
+pinMode(sens_2_echoPin, INPUT);
+pinMode(sens_3_trigPin, OUTPUT);
+pinMode(sens_3_echoPin, INPUT);
+}
+
+void loop() {
+
+center = (distance_2 + distance_3)/2; //calculates center of path
+  
+sensor_1(maximumRange, minimumRange);
+sensor_2(maximumRange, minimumRange);
+sensor_3(maximumRange, minimumRange);
+
+
+Serial.println();
+Serial.println();
+Serial.print("sensor_1        sensor_2           sensor_3");
+Serial.println();
+
+
+Serial.print(distance_1);
+Serial.print("             ");
+Serial.print(distance_2);
+Serial.print("                    ");
+Serial.print(distance_3);
+Serial.println();
+Serial.println("--------------------------------------------------------");
+Serial.println();
+Serial.println(center);
+
+//============================================================= MAZE SOLVING ALGORITHMN ===============================================================
+
+    while ( (distance_1 >=4) && (2 == center) )
+    { 
+    driveArdumoto(MOTOR_A, CW, 255);  // Motor A at max speed.
+    driveArdumoto(MOTOR_B, CW, 255);  // Motor B at max speed.
+    } 
+    if ( (distance_2 && distance_3) != center)
+    {
+      if( distance_2 > distance_3)
+      {
+        driveArdumoto(MOTOR_A,CW, 175);
+        driveArdumoto(MOTOR_B,CW, 200);
+      }
+      if( distance_3 > distance_2)
+      {
+        driveArdumoto(MOTOR_A,CW,200);
+        driveArdumoto(MOTOR_B,CW,175);
+      }
+      }
+    
+    
+    do 
+    {
+    driveArdumoto(MOTOR_A, CW, 200);  // left turn at half speed
+    driveArdumoto(MOTOR_B, CCW, 200);  
+    }
+    while ( (distance_2 > distance_3) && (distance_1 == 4) );
+    
+    do 
+    {
+    driveArdumoto(MOTOR_A, CCW, 200);  // right turn at half speed
+    driveArdumoto(MOTOR_B, CW, 200);  
+    }
+    while ( (distance_3 > distance_2) && (distance_1 == 4) );
+    
+   
+    
+
+
+delay(1000);
+
+}// end of main loop
+
+//=======================================================SENSOR FUNCTIONS=====================================================================
+
+
+long sensor_1(int maximumRange, int minimumRange){
+  
+digitalWrite(sens_1_trigPin, LOW); 
+delayMicroseconds(2); 
+
+digitalWrite(sens_1_trigPin, HIGH);
+delayMicroseconds(10); 
+
+digitalWrite(sens_1_trigPin, LOW);
+duration_1 = pulseIn(sens_1_echoPin, HIGH);
+
+distance_1 = duration_1/58.2; //Calculate the distance (in cm) based on the speed of sound.
+
+if (distance_1 >= maximumRange || distance_1 <= minimumRange){
+Serial.print("out of range_1"); 
+}
+else {
+
+return distance_1;
+}
+
+delay(50);  //Delay 50ms before next reading.   
+}
+
+long sensor_2(int maximumRange, int minimumRange){
+  
+digitalWrite(sens_2_trigPin, LOW); 
+delayMicroseconds(2); 
+
+digitalWrite(sens_2_trigPin, HIGH);
+delayMicroseconds(10); 
+
+digitalWrite(sens_2_trigPin, LOW);
+duration_2 = pulseIn(sens_2_echoPin, HIGH);
+
+distance_2 = duration_2/58.2; //Calculate the distance (in cm) based on the speed of sound.
+
+if (distance_2 >= maximumRange || distance_2 <= minimumRange){
+Serial.print("out of range_2"); 
+}
+else {
+
+return distance_2;
+}
+
+delay(50);  //Delay 50ms before next reading.  
+}
+
+long sensor_3(int maximumRange, int minimumRange){
+  
+digitalWrite(sens_3_trigPin, LOW); 
+delayMicroseconds(2); 
+
+digitalWrite(sens_3_trigPin, HIGH);
+delayMicroseconds(10); 
+
+digitalWrite(sens_3_trigPin, LOW);
+duration_3 = pulseIn(sens_3_echoPin, HIGH);
+
+distance_3 = duration_3/58.2; //Calculate the distance (in cm) based on the speed of sound.
+
+if (distance_3 >= maximumRange || distance_3 <= minimumRange){
+Serial.print("out of range_3"); 
+}
+else {
+
+return distance_3;
+}
+delay(50); //Delay 50ms before next reading.  
+}
+
+//=======================================================MOTOR FUNCTIONS=====================================================================
+
+// driveArdumoto drives 'motor' in 'dir' direction at 'spd' speed
+void driveArdumoto(byte motor, byte dir, byte spd)
+{
+  if (motor == MOTOR_A)
+  {
+    digitalWrite(DIRA, dir);
+    analogWrite(PWMA, spd);
+  }
+  else if (motor == MOTOR_B)
+  {
+    digitalWrite(DIRB, dir);
+    analogWrite(PWMB, spd);
+  }  
+}
+
+// stopArdumoto makes a motor stop
+void stopArdumoto(byte motor)
+{
+  driveArdumoto(motor, 0, 0);
+}
+
+// setupArdumoto initialize all pins
+void setupArdumoto()
+{
+  // All pins should be setup as outputs:
+  pinMode(PWMA, OUTPUT);
+  pinMode(PWMB, OUTPUT);
+  pinMode(DIRA, OUTPUT);
+  pinMode(DIRB, OUTPUT);
+
+  // Initialize all pins as low:
+  digitalWrite(PWMA, LOW);
+  digitalWrite(PWMB, LOW);
+  digitalWrite(DIRA, LOW);
+  digitalWrite(DIRB, LOW);
+}
