@@ -1,0 +1,28 @@
+// Function to convert from degree to steps
+int degreetoSteps(float degree) 
+{
+  int result;  // Final calculation result
+  float total_degree = 360;
+  float degree_step = total_degree / stepcount;  // degree per Step
+  
+  float f_result = degree / degree_step;  // Calculate result as a float
+  result = (int) f_result; // Convert to an integer (note this is NOT rounded)
+  
+  return result;  // End and return result
+
+}
+
+  
+  // Function to Move Right
+void MoveRight(int steps, int speed) 
+{
+   counter_A = 0;  //  reset counter A to zero
+  moveRight();
+   while (steps > counter_A) {
+    moveRight();
+   }
+    
+  stop();
+  counter_A = 0;  //  reset counter A to zero
+ 
+}
