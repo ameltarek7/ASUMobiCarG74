@@ -1,0 +1,577 @@
+#include <TimerOne.h>
+#include <EEPROM.h>
+int motorA1 = 11;
+int motorA2 = 13;
+int motorB1 = 4;
+int motorB2 = A3;
+int motorC1 = A2;
+int motorC2 = 7;
+int motorD1 = 8;
+int motorD2 = 9;
+int rightSensor = 10;
+int middleSensor = 12;
+int leftSensor = 2;
+int enable1 = 6;
+int enable2 = 5;
+int Speed = 0;
+char Reciever = 0;
+int trig = A0;
+int echo = A1;
+long duration, distance;
+int R;
+ //volatile int state = 1;
+//volatile int prevState = 1;
+//volatile int address = 0;
+//volatile int i = 0;
+
+int value;
+String dis ;
+
+
+
+const byte MOTOR_A = 3;  // Motor 2 Interrupt Pin - INT 1 - Right Motor
+
+
+// Constant for steps in disk
+const float stepcount = 20.00;  // 20 Slots in disk, change if different
+
+// Constant for wheel diameter
+const float wheeldiameter = 6.4;// Wheel diameter in millimeters, change if different
+
+// Integers for pulse counters
+volatile int counter_A = 0;
+
+
+// Interrupt Service Routines
+
+// Motor A pulse count ISR
+void ISR_countA()  
+{
+  counter_A++;  // increment Motor A counter value
+} 
+
+// Function to convert from centimeters to steps
+int CMtoSteps(float cm) {
+
+  int result;  // Final calculation result
+  float circumference = (wheeldiameter * 3.14); // Calculate wheel circumference in cm
+  float cm_step = circumference / stepcount;  // CM per Step
+  
+  float f_result = cm / cm_step;  // Calculate result as a float
+  result = (int) f_result; // Convert to an integer (note this is NOT rounded)
+  
+  return result;  // End and return result
+
+}
+// Function to convert from degree to steps
+int degreetoSteps(float degree) {
+
+  int result;  // Final calculation result
+  float total_degree = 360;
+  float degree_step = (wheeldiameter * 3.14) / stepcount;  // degree per Step
+  
+  float f_result = degree / degree_step;  // Calculate result as a float
+  result = (int) f_result; // Convert to an integer (note this is NOT rounded)
+  
+  return result;  // End and return result
+
+}
+
+  
+// Function to Move Right
+void MoveRight(int steps, int speed) 
+{
+   counter_A = 0;  //  reset counter A to zero
+  turn_right();
+   while (steps > counter_A) {
+    turn_right();
+   }
+    
+  Stop();
+  counter_A = 0;  //  reset counter A to zero
+ 
+}
+void setup()
+{
+  Serial.begin(9600);
+  pinMode(motorA1, OUTPUT);
+  pinMode(motorA2, OUTPUT);
+  pinMode(motorB1, OUTPUT);
+  pinMode(motorB2, OUTPUT);
+  pinMode(motorC1, OUTPUT);
+  pinMode(motorC2, OUTPUT);
+  pinMode(motorD1, OUTPUT);
+  pinMode(motorD2, OUTPUT);
+  pinMode(enable1, OUTPUT);
+  pinMode(enable2, OUTPUT);
+  pinMode(rightSensor, INPUT);
+  pinMode(middleSensor, INPUT) ;
+  pinMode(leftSensor, INPUT);
+  Timer1.initialize (1000000);
+ // Timer1.attachInterrupt (reading);
+ 
+   attachInterrupt(digitalPinToInterrupt (MOTOR_A), ISR_countA, RISING);  // Increase counter A when speed sensor pin goes High
+ 
+
+}
+void circle (int radius)
+{ 
+  R = radius - 6.5;
+  int Speed1= R*6.28;
+  Speed1 =Speed1/4;
+  Serial.println(R);
+  Serial.println(Speed1);
+  analogWrite (enable1, Speed1);
+ R = radius+ 6.5;
+ int Speed2= R*6.28;
+ Speed2 =Speed2/4;
+ Serial.println(Speed2);
+ Serial.println(R);
+  analogWrite (enable2, Speed2);
+    turn_left();
+  }
+/*void reading ()
+{
+  if (state == 0)
+ {Serial.println(state);
+  Timer1.detachInterrupt ();
+ }
+
+  else if (state == prevState)
+  { i = i + 1;
+  Serial.println(i);
+
+    if (i == 255) {
+      Timer1.detachInterrupt ();
+    }
+  }
+  else if ( state != prevState)
+  {
+    EEPROM.write( address, i);
+    i = 0;
+    address = address + 1;
+    EEPROM.write ( address , prevState);
+   Serial.println(prevState);
+     prevState = state;
+    address =address + 1;
+   
+    if (address > 1000 )
+      Timer1.detachInterrupt (); }
+
+
+  }
+
+ 
+void output ()
+{
+  for (int j = 0 ; j <= address ; j = j + 2 )
+  {
+    int timer = EEPROM.read(j);
+    int Value = EEPROM.read (j + 1);
+   Serial.println(timer);
+   Serial.println(value);
+   
+    if (value == 1)
+    {
+      forward();
+      delay (timer*100);
+    }
+    else if (value == 2)
+    { turn_right();
+      delay (timer*100);
+
+    }
+    else if (value == 3)
+    { turn_left();
+      delay (timer*100);
+
+    }
+    else if(value ==4)
+    {
+      Stop();
+      delay (25000);
+      }
+
+
+  }
+}*/
+
+void MoveForward(int steps,int mspeed) 
+{
+   counter_A = 0;  //  reset counter A to zero
+  
+   
+  forward();
+   
+   // Go forward until step value is reached
+   while (steps > counter_A) { 
+   forward;
+   }
+    
+  // Stop when done
+  Stop ();
+  counter_A = 0;  //  reset counter A to zero
+ 
+}
+
+// Function to Move in Reverse
+void MoveReverse(int steps, int mspeed) 
+{
+   counter_A = 0;  //  reset counter A to zero
+  backward;
+   
+   // Go in reverse until step value is reached
+   while (steps > counter_A ) {
+   
+   backward();
+    }
+    
+  // Stop when done
+ Stop ();
+  counter_A = 0;  //  reset counter A to zero
+  
+}
+void forward()
+{
+  digitalWrite(motorA1, HIGH);
+  digitalWrite(motorA2, LOW);
+  digitalWrite(motorB1, HIGH);
+  digitalWrite(motorB2, LOW);
+  digitalWrite(motorC1, HIGH);
+  digitalWrite(motorC2, LOW);
+  digitalWrite(motorD1, HIGH);
+  digitalWrite(motorD2, LOW);
+
+}
+
+
+void turn_left()
+{
+  digitalWrite(motorA1, HIGH);
+  digitalWrite(motorA2, LOW);
+  digitalWrite(motorB1, HIGH);
+  digitalWrite(motorB2, LOW);
+  digitalWrite(motorC1, LOW);
+  digitalWrite(motorC2, HIGH);
+  digitalWrite(motorD1, LOW);
+  digitalWrite(motorD2, HIGH);
+}
+
+void turn_right()
+{
+  digitalWrite(motorA1, LOW);
+  digitalWrite(motorA2, HIGH);
+  digitalWrite(motorB1, LOW);
+  digitalWrite(motorB2, HIGH);
+  digitalWrite(motorC1, HIGH);
+  digitalWrite(motorC2, LOW);
+  digitalWrite(motorD1, HIGH);
+  digitalWrite(motorD2, LOW);
+}
+void Stop()
+{
+  digitalWrite(motorA1, LOW);
+  digitalWrite(motorA2, LOW);
+  digitalWrite(motorB1, LOW);
+  digitalWrite(motorB2, LOW);
+  digitalWrite(motorC1, LOW);
+  digitalWrite(motorC2, LOW);
+  digitalWrite(motorD1, LOW);
+  digitalWrite(motorD2, LOW);
+}
+void speedv ( int Speed )
+{
+  analogWrite (enable1, Speed);
+   analogWrite (enable2, Speed);
+
+}
+void backward()
+{
+  digitalWrite(motorA1, LOW);
+  digitalWrite(motorA2, HIGH);
+  digitalWrite(motorB1, LOW);
+  digitalWrite(motorB2, HIGH);
+  digitalWrite(motorC1, LOW);
+  digitalWrite(motorC2, HIGH);
+  digitalWrite(motorD1, LOW);
+  digitalWrite(motorD2, HIGH);
+}
+
+
+
+void loop()
+{
+  if (Serial.available() > 0)
+  {
+    Reciever = Serial.read();
+    Serial.println( Reciever );
+    if (Reciever == '1' )
+    {
+      speedv (90);
+    }
+    else if (Reciever == '2' )
+    {
+      speedv(150);
+    }
+    else if (Reciever == '3' )
+    {
+      speedv(180);
+    }
+    else if (Reciever == '4' )
+    {
+      speedv(200);
+    }
+    else if (Reciever == '5' )
+    {
+      speedv(255);
+    }
+    else if (Reciever == 'f')
+    {
+
+      forward();
+
+    }
+    else if (Reciever == 'b')
+    {
+      backward();
+
+    }
+    else if (Reciever == 'l')
+    {
+      turn_left();
+
+    }
+    else if (Reciever == 'r')
+    {
+      turn_right( );
+
+    }
+    else if (Reciever == 's')
+    {
+      Stop();
+
+    }
+    else if (Reciever == 'q')
+    {
+      circle(100);
+
+      
+    }
+    else if (Reciever == 'g')
+    {
+      dis = ' ';
+      while(Reciever == 'g')
+      { if (Serial.available() > 0){
+        char m = Serial.read();
+      
+      
+      
+         if (m != '.')
+        
+          { 
+            dis =dis+ m ;
+          Serial.println (dis);}
+          else {
+             
+        float Step = CMtoSteps(3.3*dis.toInt());
+        Serial.println (Step);
+        MoveForward( Step,150 );
+        break; }}
+        
+      }}
+       else if (Reciever == 'i')
+    {
+      dis = ' ';
+      while(Reciever == 'i')
+      { if (Serial.available() > 0){
+        char m = Serial.read();
+      
+      
+      
+         if (m != '.')
+        
+          { 
+            dis =dis+ m ;
+          Serial.println (dis);}
+          else {
+             
+        float Step = CMtoSteps(3.3*dis.toInt());
+        Serial.println (Step);
+        MoveReverse( Step,150 );
+        break; }}
+        
+      }}
+      
+     /* else if (Reciever == 'h')
+    {
+      dis = ' ';
+      while(Reciever == 'h')
+      { if (Serial.available() > 0){
+        char m = Serial.read();
+      
+      
+      
+         if (m != '.')
+        
+          { 
+            dis =dis+ m ;
+          Serial.println (dis);}
+          else {
+             
+        float Step = degreetoSteps(dis.toInt());
+        Serial.println (Step);
+        MoveRight( Step,150 );
+        break; }}
+        
+      }}*/
+      else if (Reciever == 'h')
+    {
+      dis = ' ';
+      while(Reciever == 'h')
+      { if (Serial.available() > 0){
+        char m = Serial.read();
+      
+      
+      
+         if (m != '.')
+        
+          { 
+            dis =dis+ m ;
+          Serial.println (dis);}
+          else {
+             
+        float Step = dis.toInt();
+         Serial.println (Step);
+         //arc= (angle/180)*2pi R
+         Step = Step/180;
+         Step =Step*138.15;
+        Step= CMtoSteps(Step);
+         
+        MoveRight( Step,150 );
+        break; }}
+        
+      }}
+
+
+    else if (Reciever == 'z')
+    {
+      while ( Reciever == 'z' )
+      {
+
+
+
+        int a = digitalRead(rightSensor);
+        int b = digitalRead(middleSensor);
+        int c = digitalRead(leftSensor);
+
+        if (a == 0 && b == 1 && c == 0) // forward
+
+        {
+         // state = 1;
+          forward();
+          if (a == 1 && b == 1 && c == 1)
+            forward();
+          if (a == 0 && b == 0 && c == 0)
+            forward();
+
+        }
+        else if (a == 1 && b == 0 && c == 0) // turn right
+        {
+         // state = 2;
+          turn_right();
+          if (a == 1 && b == 1 && c == 1)
+            turn_right();
+          if (a == 0 && b == 0 && c == 0)
+            turn_right();
+
+        }
+        else if (a == 1 && b == 1 && c == 0) // turn right
+        {
+         // state = 2;
+          turn_right();
+          if (a == 1 && b == 1 && c == 1)
+            turn_right();
+          if (a == 0 && b == 0 && c == 0)
+            turn_right();
+        }
+        else if (a == 0 && b == 0 && c == 1) // turn left
+
+        {
+         // state = 3;
+          turn_left();
+          if (a == 1 && b == 1 && c == 1)
+            turn_left();
+          if (a == 0 && b == 0 && c == 0)
+            turn_left();
+
+        }
+
+
+        else if (a == 0 && b == 1 && c == 1) // turn left
+        {
+         // state = 3;
+          turn_left();
+
+          if (a == 1 && b == 1 && c == 1)
+            turn_left();
+
+          if (a == 0 && b == 0 && c == 0)
+            turn_left();
+
+        }
+        if (Serial.available() > 0)
+        { Reciever = Serial.read();
+          Serial.println( Reciever);
+          if (Reciever == 'd')
+          {// state =4;
+          Reciever = 'z';
+            }
+
+
+          if ( Reciever == 's' )
+          { Stop();
+            //state = 0;
+            break;
+          }
+        }
+
+      }
+    }
+
+    else if ( Reciever == 'u' )
+    {
+      //  ultrasonic
+
+      while ( Reciever == 'u' )
+      { analogWrite(trig , 0);
+        delayMicroseconds(2);
+        analogWrite(trig , 255);
+        delayMicroseconds( 10);
+        analogWrite(trig , 0 );
+
+        duration = pulseIn(echo, 255);
+        distance = (duration / 2) / 29 ;
+        Serial.print(distance);
+        Serial.println("CM");
+
+        if (distance < 20 )
+          turn_right();
+
+        if (distance > 20 )
+
+          forward();
+        if (Serial.available() > 0)
+        { Reciever = Serial.read();
+          Serial.println( Reciever);
+
+
+          if ( Reciever == 's' )
+          { Stop();
+            break;
+          }
+        }
+
+      }
+    }
+  }
+}
